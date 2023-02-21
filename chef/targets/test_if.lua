@@ -3,10 +3,11 @@ require "symtc"
 function number_test(provider)
     local num = provider:getint(42, "num")
     if num > 4 then
-        return nil
+        error("Expected number <= 4")
     else
-        return 1
+        num = num + 4
     end
+    return num
 end
 
 if type(arg[1]) == "number" then

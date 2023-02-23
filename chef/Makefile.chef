@@ -71,7 +71,7 @@ $(OPT_BUILD_STAMPS):
 ######################
 
 $(LUAROCKS).tar.gz:
-	wget http://luarocks.org/releases/$(LUAROCKS).tar.gz
+	wget --no-check-certificate http://luarocks.org/releases/$(LUAROCKS).tar.gz
 
 $(LUAROCKS)/configure: $(LUAROCKS).tar.gz
 	tar -xzvf $(LUAROCKS).tar.gz

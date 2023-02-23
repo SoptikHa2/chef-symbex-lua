@@ -545,17 +545,26 @@ typedef struct {
 	uint32_t op_code;
 	uint32_t frame_count;
 	uint32_t frames[_SYMBEX_TRACE_SIZE];
+  uint32_t line;
+  uint8_t filename[60];
 } __attribute__((packed)) symbex_TraceUpdate;
 
 static symbex_TraceUpdate trace_update;
 
-static int report_trace(lua_State *L) {
+static int report_trace(lua_State *L, lua_Debug *debug_info) {
 	CallInfo *ci = L->ci;
 	const Instruction *i = ci->u.l.savedpc;
 	trace_update.op_code = GET_OPCODE(*i);
 	trace_update.frame_count = _SYMBEX_TRACE_SIZE;
 	trace_update.frames[0] = (uintptr_t)ci_func(ci)->p;
 	trace_update.frames[1] = (uintptr_t)i;
+  if (debug_info) {
+    trace_update.line = debug_info->currentline;
+    trace_update.filename = debug_info->short_src;
+  } else {
+    trace_update.line = 0;
+    trace_update.filename = {0};
+  }
 
 	if (s2e_invoke_plugin("InterpreterMonitor", (void*)&trace_update,
 			sizeof(symbex_TraceUpdate)) != 0) {
@@ -606,9 +615,15 @@ void luaV_execute (lua_State *L) {
     lua_assert(base == ci->u.l.base);
     lua_assert(base <= L->top && L->top < L->stack + L->stacksize);
 #ifdef _LUA_SYMBEX_TRACE
-    if (symbex != 0) {
-    	report_trace(L);
+  if (symbex != 0) {
+    // Retrieve debug info about current instruction
+    lua_Debug debug_info;
+    if (lua_getstack(L, 0, &debug_info) && lua_getinfo(L, "Sl", &debug_info)) {
+      report_trace(L, &debug_info);
+    } else {
+    	report_trace(L, nullptr);
     }
+  }
 #endif /* LUA_TRACE */
     vmdispatch (GET_OPCODE(i)) {
       vmcase(OP_MOVE,

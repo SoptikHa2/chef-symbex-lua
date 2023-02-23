@@ -546,7 +546,7 @@ typedef struct {
 	uint32_t frame_count;
 	uint32_t frames[_SYMBEX_TRACE_SIZE];
   uint32_t line;
-  uint8_t filename[60];
+  uint8_t filename[61];
 } __attribute__((packed)) symbex_TraceUpdate;
 
 static symbex_TraceUpdate trace_update;
@@ -560,10 +560,10 @@ static int report_trace(lua_State *L, lua_Debug *debug_info) {
 	trace_update.frames[1] = (uintptr_t)i;
   if (debug_info) {
     trace_update.line = debug_info->currentline;
-    trace_update.filename = debug_info->short_src;
+    strncpy((char *)trace_update.filename, debug_info->short_src, 60);
   } else {
     trace_update.line = 0;
-    trace_update.filename = {0};
+    trace_update.filename[0] = 0;
   }
 
 	if (s2e_invoke_plugin("InterpreterMonitor", (void*)&trace_update,
@@ -621,7 +621,7 @@ void luaV_execute (lua_State *L) {
     if (lua_getstack(L, 0, &debug_info) && lua_getinfo(L, "Sl", &debug_info)) {
       report_trace(L, &debug_info);
     } else {
-    	report_trace(L, nullptr);
+    	report_trace(L, NULL);
     }
   }
 #endif /* LUA_TRACE */

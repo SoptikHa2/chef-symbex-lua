@@ -566,10 +566,6 @@ static int report_trace(lua_State *L, lua_Debug *debug_info) {
     trace_update.filename[0] = 0;
   }
 
-  // DEBUG
-  trace_update.line = 42;
-  strncpy((unsigned char *)trace_update.filename, "foobar", 60);
-
 	if (s2e_invoke_plugin("InterpreterMonitor", (void*)&trace_update,
 			sizeof(symbex_TraceUpdate)) != 0) {
 		return -1;

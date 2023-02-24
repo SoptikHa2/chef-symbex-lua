@@ -559,15 +559,14 @@ static int report_trace(lua_State *L, lua_Debug *debug_info) {
 	trace_update.frame_count = _SYMBEX_TRACE_SIZE;
 	trace_update.frames[0] = (uintptr_t)ci_func(ci)->p;
 	trace_update.frames[1] = (uintptr_t)i;
-  if (debug_info) {
-    trace_update.line = debug_info->currentline;
-    strncpy((char *)trace_update.filename, debug_info->short_src, 60);
-    strncpy((char *)trace_update.function, debug_info->name, 60);
-  } else {
-    trace_update.line = 0;
-    trace_update.filename[0] = 0;
-    trace_update.function[0] = 0;
-  }
+
+  trace_update.line = 0;
+  trace_update.filename[0] = 0;
+  trace_update.function[0] = 0;
+
+  if (debug_info) trace_update.line = debug_info->currentline;
+  if (debug_info && debug_info->short_src) strncpy((char *)trace_update.filename, debug_info->short_src, 60);
+  if (debug_info && debug_info->name) strncpy((char *)trace_update.function, debug_info->name, 60);
 
 	if (s2e_invoke_plugin("InterpreterMonitor", (void*)&trace_update,
 			sizeof(symbex_TraceUpdate)) != 0) {

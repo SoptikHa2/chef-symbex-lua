@@ -620,7 +620,7 @@ void luaV_execute (lua_State *L) {
   if (symbex != 0) {
     // Retrieve debug info about current instruction
     lua_Debug debug_info = {};
-    if (lua_getstack(L, 0, &debug_info) && lua_getinfo(L, "Sl", &debug_info)) {
+    if (lua_getstack(L, 0, &debug_info) && lua_getinfo(L, "Sln", &debug_info)) {
       report_trace(L, &debug_info);
     } else {
     	report_trace(L, NULL);

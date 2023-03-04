@@ -103,8 +103,7 @@ static int symbex_startconcolic(lua_State *L) {
 
 static int symbex_endconcolic(lua_State *L) {
 	ConcolicMessage message;
-	// lua_toboolean(L,1) returns true iff path was with no errors
-	int is_error_path = !lua_toboolean(L, 1);
+	int is_error_path = lua_toboolean(L, 1);
 
 	memset(&message, 0, sizeof(message));
 	message.command = END_CONCOLIC_SESSION;
